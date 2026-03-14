@@ -1,45 +1,43 @@
 ---
 name: audio-strategy
-description: "사운드/오디오 리소스 확보, 구현, 관리 시 참조. BGM, SFX, UI 사운드, 보이스 전략 포함."
+description: "사운드/오디오 리소스 확보, AI 생성, 구현, 관리 시 참조. VARCO Sound (SFX), MiniMax Music 2.5+ (BGM), Coplay MCP (SFX/BGM/TTS) 워크플로우 포함."
 ---
 
 # 사운드/오디오 전략
 
+> AI 오디오 생성 워크플로우는 **references/ai-audio-workflow.md** 참조.
+
 ## 오디오 카테고리
 
-| 카테고리 | 설명 | 예시 |
-|----------|------|------|
-| BGM | 배경 음악 | 메인메뉴, 로비, 전투, 보스전 |
-| SFX | 효과음 | 타격, 발소리, 환경음, 스킬 |
-| UI Sound | 인터페이스 사운드 | 버튼 클릭, 팝업, 알림, 탭 전환 |
-| Ambient | 환경 사운드 | 바람, 물소리, 숲, 도시 소음 |
-| Voice | 보이스/대사 | NPC 대사, 캐릭터 음성 |
+| 카테고리 | 설명 | 예시 | AI 생성 도구 |
+|----------|------|------|-------------|
+| BGM | 배경 음악 | 메인메뉴, 로비, 전투, 보스전 | **MiniMax Music 2.5+** |
+| SFX | 효과음 | 타격, 발소리, 환경음, 스킬 | **VARCO Sound** / Coplay |
+| UI Sound | 인터페이스 사운드 | 버튼 클릭, 팝업, 알림, 탭 전환 | **VARCO Sound** / Coplay |
+| Ambient | 환경 사운드 | 바람, 물소리, 숲, 도시 소음 | **VARCO Sound** |
+| Voice | 보이스/대사 | NPC 대사, 캐릭터 음성 | Coplay TTS / ElevenLabs |
 
 ---
 
-## 무료/저가 리소스 확보처
+## AI 오디오 생성 도구
 
-### BGM
-- Freesound.org: 무료 CC 라이선스 사운드
-- OpenGameArt.org: 게임용 무료 음악/SFX
-- Incompetech (Kevin MacLeod): CC BY 무료 BGM
-- Unity Asset Store: "Free Music" 검색
+### 1차 선택 (권장)
 
-### SFX
-- Freesound.org: 가장 큰 무료 SFX 라이브러리
-- Sonniss GDC Audio Bundle: 매년 무료 배포 (수십 GB)
-- BFXR / SFXR: 레트로/픽셀 게임용 SFX 생성기
+| 도구 | 용도 | 특징 |
+|------|------|------|
+| **MiniMax Music 2.5+** | BGM (인스트루멘탈) | API 기반, 14개 구조 태그, 장르별 자동 믹싱, $0.15/곡 |
+| **VARCO Sound** | SFX / 환경음 / UI사운드 | 텍스트→사운드, 멀티트랙 출력, 루프 생성, Unity 플러그인 |
 
-### AI 오디오 생성
-- Suno / Udio: AI 음악 생성 (상업 라이선스 확인 필수)
-- ElevenLabs: AI 보이스 생성 (NPC 대사)
-- Stable Audio: AI 기반 SFX/BGM 생성
+### 2차 선택 (보조/대안)
 
-### Coplay MCP 도구
-- `generate_sfx`: AI SFX 생성
-- `generate_music`: AI BGM 생성
-- `generate_tts`: AI TTS 보이스 생성
-- `search_tts_voice_id`: TTS 보이스 검색
+| 도구 | 용도 | 비고 |
+|------|------|------|
+| **Coplay MCP** | SFX/BGM/TTS | `generate_sfx`, `generate_music`, `generate_tts` — Unity 에디터 내 직접 생성 |
+| ElevenLabs | 보이스/TTS | 고품질 AI 보이스, 감정 표현 |
+| Freesound.org | SFX 보충 | 무료 CC 라이선스 |
+| Sonniss GDC Bundle | SFX 대량 확보 | 매년 무료 배포 |
+
+### 워크플로우 상세 → references/ai-audio-workflow.md
 
 ---
 
@@ -63,10 +61,15 @@ AudioSystem은 이미 프레임워크에 구현되어 있음:
 Assets/NetcodeFramework/Addressables/Manager/AudioManager/
 ├── Sound/
 │   ├── BGM/
+│   │   ├── Menu/
+│   │   ├── Lobby/
+│   │   ├── Battle/
+│   │   └── Boss/
 │   ├── SFX/
 │   │   ├── Combat/
 │   │   ├── Environment/
-│   │   └── Character/
+│   │   ├── Character/
+│   │   └── Interaction/
 │   ├── UI/
 │   └── Ambient/
 └── AudioManagerSettings.asset
@@ -78,12 +81,24 @@ Assets/NetcodeFramework/Addressables/Manager/AudioManager/
 
 ## 포맷 규칙
 
-| 용도 | 포맷 | Unity 압축 설정 |
-|------|------|-----------------|
-| BGM | .ogg | Streaming (메모리 절약) |
-| SFX (짧은 ~2초) | .wav | Decompress On Load |
-| SFX (긴 2초+) | .ogg | Compressed In Memory |
-| UI Sound | .wav | Decompress On Load |
+| 용도 | 포맷 | Unity 압축 설정 | AI 생성 시 설정 |
+|------|------|-----------------|----------------|
+| BGM | .ogg | Streaming (메모리 절약) | MiniMax: format mp3 → Unity에서 ogg 변환 |
+| SFX (짧은 ~2초) | .wav | Decompress On Load | VARCO/Coplay: wav 출력 |
+| SFX (긴 2초+) | .ogg | Compressed In Memory | VARCO: wav → Unity에서 ogg 변환 |
+| UI Sound | .wav | Decompress On Load | VARCO/Coplay: wav 출력 |
+
+---
+
+## 네이밍 규칙
+
+```
+BGM_{Scene}_{Mood}_{Number}.ogg       예: BGM_Battle_Intense_01.ogg
+SFX_{Category}_{Name}_{Number}.wav    예: SFX_Combat_Gunshot_01.wav
+UI_{Action}_{Number}.wav              예: UI_Click_01.wav
+AMB_{Environment}_{Number}.ogg        예: AMB_Forest_Rain_01.ogg
+VO_{Character}_{Line}_{Number}.wav    예: VO_NPC_Greeting_01.wav
+```
 
 ---
 
@@ -94,3 +109,10 @@ Assets/NetcodeFramework/Addressables/Manager/AudioManager/
 | 에셋명 | 출처 | 라이선스 | 크레딧 필요 |
 |--------|------|----------|-------------|
 | *(사용 시 채움)* | | | |
+
+**AI 생성 오디오 라이선스:**
+| 도구 | 상업 이용 | 비고 |
+|------|----------|------|
+| MiniMax Music 2.5+ | API 이용약관 확인 필요 | 생성물 소유권 정책 확인 |
+| VARCO Sound | 베타 기간 무료, 정식 출시 후 확인 | NC AI 이용약관 |
+| Coplay MCP | Coplay 라이선스 따름 | 생성물 자유 사용 |
