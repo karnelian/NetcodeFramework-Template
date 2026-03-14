@@ -1,6 +1,6 @@
 # AI 오디오 생성 워크플로우
 
-> MiniMax Music 2.5+ (BGM) + VARCO Sound (SFX) + Coplay MCP 를 활용한 게임 오디오 생성 가이드.
+> MiniMax Music 2.5+ (BGM) + VARCO Sound (SFX) 를 활용한 게임 오디오 생성 가이드.
 
 ---
 
@@ -9,7 +9,7 @@
 ```
 1단계: 오디오 요구사항 정의 (기획서/GDD 기반)
   → 2단계: BGM 생성 (MiniMax Music 2.5+)
-  → 3단계: SFX 생성 (VARCO Sound / Coplay MCP)
+  → 3단계: SFX 생성 (VARCO Sound)
   → 4단계: Unity 임포트 & 설정
   → 5단계: 검증 & 반복
 ```
@@ -130,7 +130,7 @@ if data["base_resp"]["status_code"] == 0:
 
 ---
 
-## 3단계: SFX 생성 — VARCO Sound / Coplay MCP
+## 3단계: SFX 생성 — VARCO Sound
 
 ### 방법 A: VARCO Sound (웹/API)
 
@@ -164,25 +164,6 @@ if data["base_resp"]["status_code"] == 0:
 | 환경 | `city night ambience, distant traffic, occasional siren` |
 | UI 클릭 | `soft UI click, digital, subtle, clean` |
 | UI 호버 | `gentle UI hover sound, light whoosh, soft` |
-
-### 방법 B: Coplay MCP (Unity 에디터 내)
-
-Unity 에디터에서 직접 생성:
-
-```
-# SFX 생성
-generate_sfx: "gunshot rifle single shot"
-
-# BGM 생성
-generate_music: "calm ambient piano for lobby scene"
-
-# TTS 보이스
-search_tts_voice_id: "Korean male deep"
-generate_tts: "환영합니다, 생존자여."
-```
-
-**장점:** Unity 프로젝트에 직접 생성 → 별도 다운로드/임포트 불필요
-**단점:** VARCO Sound/MiniMax 대비 품질/제어력이 낮을 수 있음
 
 ### SFX 변형 생성 전략
 
@@ -305,10 +286,3 @@ curl -X POST https://api.minimax.io/v1/music_generation \
   }'
 ```
 
-### Coplay MCP (Unity 에디터 내)
-
-```
-generate_sfx: "gunshot rifle"
-generate_music: "calm piano ambient"
-generate_tts: "Welcome, survivor." (voice_id로 음성 지정)
-```
