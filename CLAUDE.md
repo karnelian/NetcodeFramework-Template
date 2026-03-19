@@ -104,6 +104,9 @@ using NetcodeFramework.Extensions;
 - `unity-developer`: 애니메이션, 물리, 성능 최적화, 셰이더, AI/NavMesh
 - `art-style-guide`: 아트 스타일 일관성 규칙
 - `audio-strategy`: 사운드 리소스 확보/관리 전략
+- `varco-sfx-pipeline`: Varco AI SFX 생성→트리밍→변형→할당 파이프라인
+- `auto-playtest`: 자동화 플레이테스트 실행/분석/밸런스 조정
+- `unity-so-builder`: 에디터 스크립트 SO 생성, 프리팹 필드 할당 패턴
 - `ai-3d-pipeline`: AI 3D 모델 생성 파이프라인 (Coplay MCP)
 - `procedural-generation`: 절차적 생성 가이드
 - `ui-workflow`: UI 프로토타입 → Unity 변환 워크플로우
