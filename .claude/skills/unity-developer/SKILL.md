@@ -1,12 +1,19 @@
 ---
 name: unity-developer
-description: "Unity 엔진 실무 가이드. 애니메이션, 물리, 성능 최적화, 셰이더, AI/NavMesh. 아키텍처/네이밍/코딩 스타일/UI 계층은 CLAUDE.md 참조."
+description: "Unity 엔진 실무 가이드. 애니메이션, 물리, 성능 최적화, 셰이더, AI/NavMesh, 일반 Unity 패턴. 아키텍처/네이밍/코딩 스타일/UI 계층은 CLAUDE.md 참조. 성능 프로파일링, 메모리 최적화, Draw Call 배칭, LOD, 오클루전 컬링, Update 최적화 등 심화 내용은 `references/performance-deep-dive.md` 참조."
 ---
 
 # Unity 개발 가이드 (엔진 실무)
 
 > **아키텍처 패턴, 네이밍 컨벤션, 코딩 스타일, UI 계층 규칙은 프로젝트 루트 `CLAUDE.md` 참조.**
 > 이 스킬은 CLAUDE.md가 다루지 않는 Unity 엔진 실무 영역을 커버한다.
+
+## 참조 파일
+
+| 파일 | 내용 | 참조 시점 |
+|------|------|-----------|
+| `references/performance-deep-dive.md` | Profiler 코드 패턴, 메모리/GC 심화, Draw Call 배칭 코드, LOD 코드 설정, 오클루전 컬링, Physics 최적화, Update 분산, 비동기 로딩, 성능 체크리스트 | 성능 최적화 작업, 프로파일링, 프레임 드랍 디버깅 시 |
+| `references/unity-patterns.md` | MonoBehaviour 베스트 프랙티스, ScriptableObject 데이터 패턴, Object Pooling, Event System, Coroutine 패턴, Singleton | 일반 Unity 코드 패턴 참조 시 |
 
 ---
 
@@ -65,7 +72,7 @@ description: "Unity 엔진 실무 가이드. 애니메이션, 물리, 성능 최
 
 ### Update vs FixedUpdate
 | 로직 | 사용할 곳 |
-|------|-----------|
+|------|-----------| 
 | 물리 이동 (Rigidbody.velocity, AddForce) | FixedUpdate |
 | 입력 읽기 (Input System) | Update |
 | Raycast | Update 또는 FixedUpdate (용도에 따라) |
@@ -92,6 +99,8 @@ int count = Physics.RaycastNonAlloc(origin, direction, _hits, maxDistance, layer
 ---
 
 ## 성능 최적화
+
+> **심화 내용 (코드 패턴, Profiler 활용, 체크리스트)은 `references/performance-deep-dive.md` 참조.**
 
 ### 배칭
 - **Static Batching**: 움직이지 않는 오브젝트 → Inspector에서 Static 체크
@@ -126,6 +135,20 @@ _sb.Clear(); _sb.Append("HP: "); _sb.Append(hp); // StringBuilder 재사용
 - GPU: Draw Call, 배칭 효율 확인
 - Coplay MCP: `get_worst_cpu_frames`, `get_worst_gc_frames` 도구 활용
 
+### 성능 목표 (60 FPS = 16.67ms)
+
+| 영역 | 프레임 예산 |
+|------|-------------|
+| Game Logic | 5–7ms |
+| Rendering | 3–5ms |
+| Physics | 2–3ms |
+| Scripts | 2–3ms |
+
+### Update 최적화 전략
+- **Staggered Update**: 비싼 로직을 N프레임마다 분산 실행
+- **Distance-based Update**: 플레이어와의 거리에 따라 업데이트 빈도 조절 (가까운: 20fps, 먼: 2fps)
+- **Raycast 간격 제한**: 매 프레임 대신 0.1초 간격으로 실행
+
 ---
 
 ## 셰이더 / 머티리얼
@@ -156,6 +179,11 @@ void SetColor(Color color)
 - 노드 그래프로 셰이더 제작 (코드 없이)
 - 자주 쓰는 패턴: Dissolve (Step + Noise), Outline (Fresnel), Tint (Color Multiply)
 - Sub Graph로 재사용 가능한 노드 그룹 추출
+
+### 머티리얼 최적화
+- `renderer.material` 사용 금지 (인스턴스 복제 → 배칭 파괴)
+- `renderer.sharedMaterial`로 공유, 인스턴스별 차이는 MaterialPropertyBlock으로
+- 텍스처 아틀라스: 여러 텍스처를 하나로 합쳐 Draw Call 절감
 
 ---
 
@@ -190,7 +218,7 @@ animator.SetFloat("Speed", speed);
 ## Coroutine vs R3 Observable
 
 | 상황 | 사용할 것 |
-|------|-----------|
+|------|-----------| 
 | 프레임워크 시스템 (Manager/Service) | R3 Observable (CLAUDE.md 패턴 따름) |
 | 게임플레이 타이머, 딜레이 | R3 Observable.Timer / Observable.Interval |
 | MonoBehaviour 내부 간단한 시퀀스 | Coroutine 허용 (단, 3줄 이하) |
@@ -198,8 +226,28 @@ animator.SetFloat("Speed", speed);
 
 Coroutine을 쓸 때:
 - `yield return null` (매 프레임), `yield return new WaitForSeconds(t)`
+- WaitForSeconds는 캐싱하여 재사용 (GC 방지)
 - `StopCoroutine` 반드시 호출 (메모리 누수 방지)
 - 복잡한 상태 머신은 Coroutine 대신 R3 또는 State 패턴 사용
+
+---
+
+## 일반 Unity 패턴 요약
+
+> **상세 코드는 `references/unity-patterns.md` 참조.**
+
+### 핵심 규칙
+- `GetComponent<T>()` → Awake/Start에서 캐싱, Update에서 호출 금지
+- `CompareTag()` 사용 (`tag == "TagName"` 비교 금지)
+- `Camera.main` → Start에서 캐싱
+- `Destroy` 대신 Object Pooling (프레임워크: `PoolManager.instance.Spawn/Despawn`)
+- `Instantiate` 루프 금지 → 풀링 또는 사전 생성
+
+### ScriptableObject 활용
+- 게임 데이터(무기, 적, 스킬 등)는 SO에 정의
+- `[CreateAssetMenu]` 어트리뷰트로 에디터 메뉴 등록
+- SO에 메서드 포함 가능 (데미지 계산 등 순수 함수)
+- 프레임워크 연동: `unity-so-builder` 스킬로 에디터 스크립트 자동화
 
 ---
 

@@ -1,13 +1,21 @@
 ---
 name: ui-workflow
-description: "UI 프로토타이핑 및 Unity UI 구현 시 참조. JSX/HTML 프로토타입 → Unity UI 변환 워크플로우. UI를 만들거나 배치하려는 요청, HTML/JSX 목업을 Unity로 변환, UI 스펙 문서 작성, 팝업/HUD/인벤토리 등 UI 구현, UI 에셋 배치, 플레이스홀더 UI 작업 등에 이 스킬을 사용한다."
+description: "UI 프로토타이핑 및 Unity UI 구현 시 참조. JSX/HTML 프로토타입 → Unity UI 변환 워크플로우. UI Prefab 계층 규칙(GameObject 네이밍, 구조 패턴 9종), UI 세팅 규격, 플레이스홀더 규칙 포함. UI를 만들거나 배치하려는 요청, HTML/JSX 목업을 Unity로 변환, UI 스펙 문서 작성, 팝업/HUD/인벤토리 등 UI 구현, UI 에셋 배치, 플레이스홀더 UI 작업, UI 프리팹 네이밍/계층 구조 작업에 이 스킬을 사용한다."
 ---
 
 # UI 프로토타이핑 & 구현 워크플로우
 
-> **UI 계층 구조, 네이밍 컨벤션, 접두사 규칙은 `hierarchy-rules` 스킬 참조.**
-> **에셋 선택 기준은 `art-style-guide` 스킬 참조.**
 > **에셋 경로/폴더 구조는 `asset-management` 스킬 참조.**
+> **MVVM 패턴 상세는 `netcode-framework` 스킬 (references/code-patterns.md) 참조.**
+
+## 참조 파일
+
+| 파일 | 내용 | 참조 시점 |
+|------|------|-----------|
+| `references/hierarchy-rules.md` | GameObject 네이밍 접두사, 구조 패턴 9종 (_ani+_z_back, 팝업 루트, 슬롯 상태 전환, 버튼, FX, 동적 리스트, 영역 분할, 스킬 슬롯, 다중 상태) | UI 프리팹 생성/수정, 네이밍 확인 시 **반드시** 참조 |
+| `references/ui-settings.md` | Canvas 기본 설정, RectTransform 앵커 패턴, LayoutGroup 패턴, 컴포넌트 기본값 | UI 스펙 변환, RectTransform 설정 시 |
+| `references/ui-spec-template.md` | ui-spec.md 출력 형식 템플릿 | UI 스펙 문서 작성 시 |
+| `references/placeholder-rules.md` | 에셋 부재 시 플레이스홀더 색상/규칙 | 에셋 없이 UI 구현할 때 |
 
 ---
 
@@ -37,10 +45,9 @@ description: "UI 프로토타이핑 및 Unity UI 구현 시 참조. JSX/HTML 프
 ## 2단계: JSX/HTML 프로토타입 생성
 
 ### 작성 규칙
-- 실제 게임 해상도 비율 적용 (`art-style-guide`의 타겟 해상도 참조)
+- 실제 게임 해상도 비율 적용
 - Unity UI 레이아웃을 의식하여 구성 (앵커 기반, LayoutGroup 대응)
 - 인터랙션 포함 (버튼 클릭, 탭 전환, 패널 열기/닫기)
-- `art-style-guide`의 색상 팔레트 적용
 
 ### 저장 위치
 ```
@@ -55,17 +62,16 @@ docs/02-design/features/{FeatureName}/
 ## 3단계: Unity UI 스펙 변환
 
 프로토타입이 확정되면 **ui-spec.md 스펙 문서**를 생성한다.
-HTML/JSX를 그대로 넘기지 않고, Unity가 이해할 수 있는 용어로 번역하는 단계이다.
 
 ### 반드시 참조할 문서
-- **references/ui-settings.md** — 프로젝트 고유 UI 세팅 규격 (Canvas, 앵커 패턴, LayoutGroup 패턴, 컴포넌트 기본값)
-- **`hierarchy-rules` 스킬** — GameObject 네이밍, 계층 구조 패턴
+- **references/ui-settings.md** — Canvas, 앵커 패턴, LayoutGroup, 컴포넌트 기본값
+- **references/hierarchy-rules.md** — GameObject 네이밍, 계층 구조 패턴
 
 ### 스펙 문서에 포함할 내용
 
 각 UI 요소마다:
 
-1. **GameObject 이름** — `hierarchy-rules`의 접두사 규칙 적용
+1. **GameObject 이름** — `references/hierarchy-rules.md`의 접두사 규칙 적용
    - 팝업 루트: `Popup_{Name}`
    - 버튼: `btn_{name}`
    - 텍스트: `t_{name}` 또는 `Txt_{Name}`
@@ -73,19 +79,14 @@ HTML/JSX를 그대로 넘기지 않고, Unity가 이해할 수 있는 용어로 
    - 레이아웃 컨테이너: `_layout_{name}`
    - 상태 오브젝트: `obj_{state}`
 
-2. **계층 구조** — `hierarchy-rules`의 패턴 적용
+2. **계층 구조** — `references/hierarchy-rules.md`의 패턴 적용
    - `_ani` + `_z_back` 래핑 (애니메이션 가능 요소)
    - 상태 전환은 `obj_default` / `obj_locked` / `obj_selected` (SetActive)
    - 시각 요소와 클릭 영역 분리 (`_ani/_z_back` + `btn` 별도)
 
 3. **RectTransform 설정** — `references/ui-settings.md`의 앵커 패턴 적용
-   - Anchor (Min, Max)
-   - Pivot
-   - Size 또는 Offset
 
 4. **컴포넌트 및 설정값** — `references/ui-settings.md`의 기본값 적용
-   - Image, TextMeshProUGUI, Button, LayoutGroup 등
-   - LayoutGroup: Padding, Spacing, Child Alignment 등 구체적 수치
 
 5. **에셋 지정** — catalog.md에서 매칭하거나 플레이스홀더 표기
 
@@ -116,26 +117,13 @@ HTML/JSX를 그대로 넘기지 않고, Unity가 이해할 수 있는 용어로 
 ## 4단계: 에셋 매칭
 
 ### catalog.md가 있는 경우
-
-스펙 문서의 각 요소에 catalog.md의 에셋을 매칭한다:
-
-```
-- 에셋: catalog → [패키지명] → [파일명]
-- 경로: Assets/UI/[패키지폴더]/[파일명]
-```
-
-Sprite의 경우 9-slice 여부, 크기를 catalog.md에서 확인하고 Image Type을 결정한다.
+스펙 문서의 각 요소에 catalog.md의 에셋을 매칭한다.
+Sprite의 경우 9-slice 여부, 크기를 확인하고 Image Type을 결정한다.
 
 ### catalog.md가 없는 경우
-
 사용자에게 알리고 두 가지 중 선택:
-1. 에셋 카탈로그를 먼저 생성한다 (별도 작업)
-2. 전체를 플레이스홀더로 진행한다
-
-### 플레이스홀더 규칙
-
-에셋이 없는 요소는 **references/placeholder-rules.md**의 규칙을 적용한다.
-플레이스홀더로 대체한 요소는 스펙 문서의 **플레이스홀더 목록**에 반드시 기록한다.
+1. 에셋 카탈로그를 먼저 생성한다
+2. 전체를 플레이스홀더로 진행한다 (`references/placeholder-rules.md` 참조)
 
 ---
 
@@ -144,7 +132,7 @@ Sprite의 경우 9-slice 여부, 크기를 catalog.md에서 확인하고 Image T
 ### 구현 순서
 
 1. Canvas 생성 — `references/ui-settings.md`의 Canvas 기본 설정대로
-2. 계층 구조 생성 — 스펙의 트리 구조대로, `hierarchy-rules` 패턴 적용
+2. 계층 구조 생성 — 스펙의 트리 구조대로, `references/hierarchy-rules.md` 패턴 적용
 3. RectTransform 설정 — 스펙의 앵커/피벗/사이즈대로
 4. 컴포넌트 추가 — 스펙의 컴포넌트 및 설정값대로
 5. 에셋 할당 — catalog.md 경로로 스프라이트/폰트 할당
@@ -159,9 +147,6 @@ Sprite의 경우 9-slice 여부, 크기를 catalog.md에서 확인하고 Image T
 | `manage_ui` | UI 전용 작업 (Canvas, RectTransform 등) |
 | `manage_prefabs` | 프리팹 생성/수정 |
 | `manage_asset` | 에셋 참조/할당 |
-| `manage_texture` | 스프라이트 임포트 설정 |
-| `manage_material` | 머터리얼 할당 |
-| `create_script` | UI 제어 스크립트 생성 |
 | `batch_execute` | 3개 이상 작업 시 반드시 사용 (10~100배 빠름) |
 | `capture_ui_canvas` | UI Canvas 스크린샷 캡처 (검증용) |
 
@@ -193,14 +178,11 @@ Sprite의 경우 9-slice 여부, 크기를 catalog.md에서 확인하고 Image T
 ```
 
 ### 피드백 반영
-
 수정 시 ui-spec.md도 같이 업데이트한다.
 
 ---
 
 ## 에셋 교체 (플레이스홀더 → 최종 에셋)
-
-최종 에셋이 준비되면:
 
 1. 사용자에게 교체 목록 확인
 2. Coplay MCP로 스프라이트/폰트 일괄 교체
@@ -244,12 +226,4 @@ View (GameSessionBaseView<TViewModel> 상속)
   └── OnViewModelBound()에서 ViewModel 구독 → UI 갱신
 ```
 
-상세 코드 패턴은 `framework-patterns` 스킬 참조.
-
----
-
-## 참조 파일
-
-- **references/ui-settings.md** — 프로젝트 고유 UI 세팅 규격 (Canvas, 앵커, LayoutGroup, 컴포넌트 기본값)
-- **references/ui-spec-template.md** — ui-spec.md 출력 형식 템플릿
-- **references/placeholder-rules.md** — 에셋 부재 시 플레이스홀더 규칙
+상세 코드 패턴은 `netcode-framework` 스킬 (references/code-patterns.md) 참조.

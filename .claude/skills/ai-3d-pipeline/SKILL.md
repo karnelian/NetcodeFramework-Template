@@ -77,7 +77,7 @@ generate_or_edit_images (2D 컨셉아트 생성)
 
 ### AI 생성 모델 공통 주의사항
 - **폴리곤 수**: `list_objects_with_high_polygon_count`로 확인. 기준 초과 시 Blender Decimate 또는 LOD 설정
-- **텍스처 해상도**: `art-style-guide` 기준 초과 시 리사이즈
+- **텍스처 해상도**: 프로젝트 아트 스타일 기준 초과 시 리사이즈
 - **머티리얼**: URP에 맞게 셰이더 변환 필요 (`assign_material_to_fbx`, `assign_material`)
 - **피벗 포인트**: AI 모델은 피벗이 맞지 않는 경우 많음 → Blender에서 원점 조정
 
@@ -96,7 +96,7 @@ generate_or_edit_images (2D 컨셉아트 생성)
 
 ## 에셋 평가 기준
 
-AI 생성 모델 채택 시 (`art-style-guide` 체크리스트와 동일):
+AI 생성 모델 채택 시 (아트 스타일 체크리스트):
 - [ ] 아트 스타일 가이드와 일관성
 - [ ] 폴리곤 수 기준 이내
 - [ ] UV 맵 깨끗한가
