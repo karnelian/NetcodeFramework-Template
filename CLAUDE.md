@@ -86,24 +86,44 @@ using NetcodeFramework.Extensions;
 - **작업 시작 전에 "참조 스킬: xxx" 형태로 읽은 스킬을 응답에 명시할 것**
 - 스킬을 읽지 않은 작업은 품질 미달로 간주
 
+### 스킬 목록 (13개)
+
+| 스킬 | 역할 |
+|------|------|
+| `netcode-framework` | 프레임워크 아키텍처, 코드 패턴(R3/MVVM/Handle), 26개 시스템 API |
+| `unity-developer` | Unity 엔진 실무 (애니메이션, 물리, 성능 최적화, 셰이더, AI/NavMesh) |
+| `ui-workflow` | UI 프로토타입→구현 워크플로우, Prefab 계층 규칙/네이밍 포함 |
+| `audio-strategy` | 오디오 전략 (Varco SFX 파이프라인 + MiniMax BGM 포함) |
+| `scene-structure` | 씬 플로우, 전환 규칙, 영속 매니저 |
+| `asset-management` | Addressable 경로, 서브모듈, Git LFS |
+| `testing-strategy` | NUnit 테스트 규칙, R3 오버로드 회피, async 교착 방지 |
+| `unity-so-builder` | SO/프리팹 에디터 스크립트 패턴 |
+| `auto-playtest` | Coplay MCP 자동 플레이테스트 |
+| `ai-3d-pipeline` | AI 3D 모델 생성 파이프라인 (Meshy/Tripo/Coplay MCP) |
+| `multiplayer-netcode` | 멀티플레이어 네트워킹 (예측/보간/래그 보상/동기화) |
+| `unity-dots` | DOTS/ECS 패턴 (Job System, Burst Compiler) |
+| `publishing-guide` | 배포/Steam 통합/콘솔 인증/컨트롤러 지원 |
+
 ### 작업 영역별 필수 스킬 매핑
 
 | 작업 영역 | 필수 스킬 | 설명 |
 |-----------|-----------|------|
-| UI 생성/수정 | `hierarchy-rules`, `ui-workflow` | 네이밍(Popup_, btn_, t_, img_), 구조 패턴(_ani/_z_back), 프로토타입→Unity 변환 |
-| Popup/Toast UI | `hierarchy-rules`, `framework-systems-api` | IPopup 인터페이스, UIManager.ShowPopup(), PopupType 등록 |
+| 새 Manager/System 추가 | `netcode-framework` | Init Chain, MonoSingleton, ServiceType Registry, R3/MVVM |
+| EventBus/Command/Pool 등 | `netcode-framework` | 26개 시스템 API (references/systems-api.md) |
+| R3 Observable/MVVM 코드 | `netcode-framework` | R3 규칙, ViewModel/View 패턴 (references/code-patterns.md) |
+| UI 생성/수정 | `ui-workflow` | 네이밍(Popup_, btn_, t_, img_), 구조 패턴(_ani/_z_back), 프로토타입→Unity 변환. 계층 규칙은 references/hierarchy-rules.md |
+| Popup/Toast UI | `ui-workflow`, `netcode-framework` | IPopup 인터페이스, UIManager API |
 | 씬 구조/전환 | `scene-structure` | 씬 플로우, 영속 매니저, SceneSystem Strategy |
-| 새 Manager/System 추가 | `framework-architecture`, `framework-patterns` | Init Chain, MonoSingleton, ServiceType Registry, R3/MVVM |
-| EventBus/Command/Pool 등 | `framework-systems-api` | 26개 시스템 API 사용법 |
-| 3D 모델/에셋 생성 | `ai-3d-pipeline`, `art-style-guide` | AI 모델 생성 파이프라인, 아트 스타일 일관성 |
-| 오디오/사운드 | `audio-strategy` | BGM/SFX/UI 사운드 리소스 확보/관리 |
-| SFX 생성 (Varco AI) | `varco-sfx-pipeline` | Varco API 호출→트리밍→변형→할당 파이프라인 |
+| 오디오/사운드/SFX 생성 | `audio-strategy` | BGM/SFX/UI 사운드 리소스 확보/관리/Varco API 파이프라인 |
+| 3D 모델/에셋 생성 | `ai-3d-pipeline` | AI 모델 생성 파이프라인 |
 | 자동화 플레이테스트 | `auto-playtest` | Coplay MCP Play→로그 분석→결과 비교 |
-| SO/프리팹 설정 | `unity-so-builder` | 에디터 스크립트 SO 생성, 프리팹 필드 할당 패턴 |
-| 물리/AI/NavMesh/최적화 | `unity-developer` | 애니메이션, 물리, 성능, 셰이더, AI |
-| 프로시저럴 생성 | `procedural-generation` | 셰이더, 터레인, 이펙트, 레벨 코드 생성 |
+| SO/프리팹 설정 | `unity-so-builder` | 에디터 스크립트 SO 생성, 프리팹 필드 할당 |
+| 물리/AI/NavMesh/최적화 | `unity-developer` | 애니메이션, 물리, 성능, 셰이더, AI. 심화 성능은 references/performance-deep-dive.md |
+| 멀티플레이어 네트워킹 | `multiplayer-netcode` | 서버 권위, 예측/보간/리콘실리에이션, 래그 보상 |
+| DOTS/ECS 구현 | `unity-dots` | Entity Component System, Job System, Burst Compiler |
 | 에셋 관리/커밋 | `asset-management` | Addressable 경로, 서브모듈, Git LFS |
 | 테스트 작성 | `testing-strategy` | Edit Mode NUnit, R3 오버로드 회피, async 교착 방지 |
+| 게임 배포/스토어 | `publishing-guide` | Steam 통합, 콘솔 인증, 컨트롤러, 빌드 체크리스트 |
 
 ---
 
